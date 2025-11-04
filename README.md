@@ -158,8 +158,3 @@ The `task` table was created to store information about the tasks including name
 
 - User authentication, including login and logout endpoints, have been added due to the relation between the type of the user and the permissions of several endpoints.
 - Password encryption has been added for extra security when creating a user.
----
-
-### Observations 📝
-
-- The `.env` file should not be public on the repository for security purposes. On the context of this application, the `.env` is available on the repository as an example for easy setup of the application. Since the application is only executed locally, the environment variables in its content have no production impact.
