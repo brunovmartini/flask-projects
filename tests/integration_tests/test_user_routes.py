@@ -15,6 +15,16 @@ def user_data():
     }
 
 
+@pytest.fixture
+def invalid_request():
+    return {
+        "password": "plain_password",
+        "username": "newuser",
+        "name": "New User",
+        "user_type": 1
+    }
+
+
 @patch("services.user.user_service.UserService.get_users")
 def test_get_users(mock_get_users, client):
     mock_get_users.return_value = [
@@ -136,3 +146,21 @@ def test_delete_user_not_found(mock__get_user, mock_get_user, client, user):
 
     response = client.delete("/users/9999")
     assert response.status_code == 404
+
+
+def test_create_user_bad_request(
+    client, user, invalid_request
+):
+    login_as(client, user)
+
+    response = client.post("/users/", json=invalid_request)
+    assert response.status_code == 400
+
+
+def test_update_user_bad_request(
+    client, user, invalid_request
+):
+    login_as(client, user)
+
+    response = client.put("/users/1", json=invalid_request)
+    assert response.status_code == 400

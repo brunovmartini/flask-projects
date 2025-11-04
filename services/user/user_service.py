@@ -7,7 +7,6 @@ from werkzeug.exceptions import BadRequest, NotFound, Unauthorized, Conflict, Un
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
 
-from helpers.helpers import is_invalid_request
 from models.user import User
 from repositories.user_repository import UserRepository
 from resources.request.auth_request import LoginRequest
@@ -41,9 +40,6 @@ class UserService:
         return Response('Login successful.', status=200)
 
     def create_user(self, body: CreateUserRequest) -> dict[str, Any] | None:
-        if is_invalid_request(body):
-            raise BadRequest()
-
         if self.get_user_by_email(body.email):
             raise Conflict()
 
@@ -69,9 +65,6 @@ class UserService:
 
     def update_user(self, user_id: int, body: UpdateUserRequest) -> dict[str, Any] | None:
         user = self.get_user_by_id(user_id=user_id)
-
-        if is_invalid_request(body):
-            raise BadRequest()
 
         user.update(body.__dict__)
         user.updated_at = datetime.now(timezone.utc)

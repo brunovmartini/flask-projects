@@ -42,9 +42,7 @@ def test_create_task_success(
 ):
     with patch("services.task.task_service.current_user") as mock_current_user:
         mock_current_user.id = 1
-        with patch(
-            "services.task.task_service.is_invalid_request", return_value=False
-        ), patch.object(
+        with patch.object(
             mock_repository, "create", return_value=sample_task
         ) as mock_create:
 
@@ -59,12 +57,6 @@ def test_create_task_success(
             }
 
             mock_create.assert_called_once()
-
-
-def test_create_task_invalid_request(task_service, sample_request):
-    with patch("services.task.task_service.is_invalid_request", return_value=True):
-        with pytest.raises(BadRequest):
-            task_service.create_task(project_id=100, body=sample_request)
 
 
 def test_get_tasks_by_project_success(task_service, mock_repository, sample_task):

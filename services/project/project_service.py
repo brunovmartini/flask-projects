@@ -3,9 +3,8 @@ from typing import List, Any
 
 from flask import Response
 from flask_login import current_user
-from werkzeug.exceptions import BadRequest, NotFound
+from werkzeug.exceptions import NotFound
 
-from helpers.helpers import is_invalid_request
 from models.project import Project
 from repositories.project_repository import ProjectRepository
 from resources.request.project_request import ProjectRequest
@@ -23,9 +22,6 @@ class ProjectService:
         return project
 
     def create_project(self, body: ProjectRequest) -> dict[str, Any] | None:
-        if is_invalid_request(body):
-            raise BadRequest()
-
         project = self.repository.create(
             Project(
                 name=body.name,
@@ -47,9 +43,6 @@ class ProjectService:
 
     def update_project(self, project_id: int, body: ProjectRequest) -> dict[str, Any] | None:
         project = self.get_project_by_id(project_id=project_id)
-
-        if is_invalid_request(body):
-            raise BadRequest()
 
         project.update(body.__dict__)
         project.updated_at = datetime.now(timezone.utc)

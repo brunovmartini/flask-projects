@@ -9,7 +9,7 @@ class Task(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(255), nullable=False)
-    description = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.String(255))
     start_date = db.Column(db.DateTime)
     due_date = db.Column(db.DateTime)
     project_id = db.Column(db.Integer, ForeignKey("project.id"))

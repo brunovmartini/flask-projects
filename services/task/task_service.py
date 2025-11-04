@@ -1,9 +1,6 @@
 from datetime import datetime, timezone
 from typing import List, Any
 
-from werkzeug.exceptions import BadRequest
-
-from helpers.helpers import is_invalid_request
 from models.task import Task
 from flask_login import current_user
 from repositories.task_repository import TaskRepository
@@ -16,9 +13,6 @@ class TaskService:
         self.repository = repository
 
     def create_task(self, project_id: int, body: TaskRequest) -> dict[str, Any] | None:
-        if is_invalid_request(body):
-            raise BadRequest()
-
         task = self.repository.create(
             Task(
                 name=body.name,
