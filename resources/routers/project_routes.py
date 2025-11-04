@@ -36,6 +36,25 @@ def create_project(body: ProjectRequest):
 @project_apis.route('/', methods=['GET'])
 @login_required
 def get_projects():
+    """
+    Retrieve a paginated list of projects.
+
+    Query parameters:
+        page (int, optional): Page number (default: 1). Must be greater than 0.
+        page_size (int, optional): Number of items per page (default: 10). Must be between 1 and 100.
+
+    :return: Paginated response containing projects and metadata
+    :rtype: dict
+    :return items: List of project objects
+    :return meta: Pagination metadata containing:
+        - page (int): Current page number
+        - page_size (int): Number of items per page
+        - total (int): Total number of items
+        - total_pages (int): Total number of pages
+        - has_next (bool): Whether there is a next page
+        - has_prev (bool): Whether there is a previous page
+    :raises BadRequest: if pagination parameters are invalid
+    """
     page, page_size = validate_pagination(request.args)
     return ProjectService(repository=ProjectRepository(db_session=db.session)).get_projects(page=page,
                                                                                             page_size=page_size)
@@ -119,6 +138,28 @@ def create_task(project_id: int, body: TaskRequest):
 @project_apis.route('/<int:project_id>/tasks', methods=['GET'])
 @login_required
 def get_tasks_by_project(project_id: int):
+    """
+    Retrieve a paginated list of tasks for a specific project.
+
+    Query parameters:
+        page (int, optional): Page number (default: 1). Must be greater than 0.
+        page_size (int, optional): Number of items per page (default: 10). Must be between 1 and 100.
+
+    :param project_id: ID of the project
+    :type project_id: int
+    :return: Paginated response containing tasks and metadata
+    :rtype: dict
+    :return items: List of task objects
+    :return meta: Pagination metadata containing:
+        - page (int): Current page number
+        - page_size (int): Number of items per page
+        - total (int): Total number of items
+        - total_pages (int): Total number of pages
+        - has_next (bool): Whether there is a next page
+        - has_prev (bool): Whether there is a previous page
+    :raises NotFound: if project with given ID does not exist
+    :raises BadRequest: if pagination parameters are invalid
+    """
     if not ProjectService(repository=ProjectRepository(db_session=db.session)).get_project(project_id=project_id):
         raise NotFound(f'Not found project with id={project_id}.')
 

@@ -33,6 +33,25 @@ def create_user(body: CreateUserRequest):
 @user_apis.route('/', methods=['GET'])
 @login_required
 def get_users():
+    """
+    Retrieve a paginated list of users.
+
+    Query parameters:
+        page (int, optional): Page number (default: 1). Must be greater than 0.
+        page_size (int, optional): Number of items per page (default: 10). Must be between 1 and 100.
+
+    :return: Paginated response containing users and metadata
+    :rtype: dict
+    :return items: List of user objects
+    :return meta: Pagination metadata containing:
+        - page (int): Current page number
+        - page_size (int): Number of items per page
+        - total (int): Total number of items
+        - total_pages (int): Total number of pages
+        - has_next (bool): Whether there is a next page
+        - has_prev (bool): Whether there is a previous page
+    :raises BadRequest: if pagination parameters are invalid
+    """
     page, page_size = validate_pagination(request.args)
     return UserService(repository=UserRepository(db_session=db.session)).get_users(page=page, page_size=page_size)
 
