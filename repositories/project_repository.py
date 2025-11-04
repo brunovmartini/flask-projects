@@ -27,6 +27,7 @@ class ProjectRepository(IRepository[Project, int]):
     @override
     def update(self, data: Project) -> Project | None:
         self.db_session.commit()
+        self.db_session.refresh(data)
         return data
 
     @override
