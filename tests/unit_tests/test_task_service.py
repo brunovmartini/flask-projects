@@ -42,9 +42,7 @@ def test_create_task_success(
 ):
     with patch("services.task.task_service.current_user") as mock_current_user:
         mock_current_user.id = 1
-        with patch(
-            "services.task.task_service.is_invalid_request", return_value=False
-        ), patch.object(
+        with patch.object(
             mock_repository, "create", return_value=sample_task
         ) as mock_create:
 
@@ -61,14 +59,8 @@ def test_create_task_success(
             mock_create.assert_called_once()
 
 
-def test_create_task_invalid_request(task_service, sample_request):
-    with patch("services.task.task_service.is_invalid_request", return_value=True):
-        with pytest.raises(BadRequest):
-            task_service.create_task(project_id=100, body=sample_request)
-
-
 def test_get_tasks_by_project_success(task_service, mock_repository, sample_task):
-    mock_repository.get_all_tasks_by_project.return_value = [sample_task]
+    mock_repository.get_all_tasks_by_project.return_value = ([sample_task], 1)
 
     fake_response = Mock()
     fake_response.model_dump.return_value = {
@@ -85,14 +77,22 @@ def test_get_tasks_by_project_success(task_service, mock_repository, sample_task
     ) as mock_from_orm:
         result = task_service.get_tasks_by_project(project_id=100)
 
-        assert len(result) == 1
-        assert result[0]["name"] == "Test Task"
-        mock_repository.get_all_tasks_by_project.assert_called_once_with(project_id=100)
+        assert "items" in result
+        assert "meta" in result
+        assert len(result["items"]) == 1
+        assert result["items"][0]["name"] == "Test Task"
+        assert result["meta"]["total"] == 1
+        assert result["meta"]["page"] == 1
+        assert result["meta"]["page_size"] == 10
+        mock_repository.get_all_tasks_by_project.assert_called_once_with(project_id=100, page=1, page_size=10)
         mock_from_orm.assert_called_once_with(sample_task)
 
 
 def test_get_tasks_by_project_empty(task_service, mock_repository):
-    mock_repository.get_all_tasks_by_project.return_value = []
+    mock_repository.get_all_tasks_by_project.return_value = ([], 0)
 
     result = task_service.get_tasks_by_project(project_id=999)
-    assert result == []
+    assert "items" in result
+    assert "meta" in result
+    assert result["items"] == []
+    assert result["meta"]["total"] == 0

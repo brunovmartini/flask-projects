@@ -16,9 +16,12 @@ class ProjectRepository(IRepository[Project, int]):
         self.db_session.refresh(data)
         return data
 
-    @override
-    def get_all(self) -> list[Project]:
-        return self.db_session.query(Project).all()
+    def get_all(self, page: int = 1, page_size: int = 10) -> tuple[list[Project], int]:
+        query = self.db_session.query(Project)
+        total = query.count()
+        offset = (page - 1) * page_size
+        projects = query.offset(offset).limit(page_size).all()
+        return projects, total
 
     @override
     def get_by_id(self, id: int) -> Project | None:
@@ -27,6 +30,7 @@ class ProjectRepository(IRepository[Project, int]):
     @override
     def update(self, data: Project) -> Project | None:
         self.db_session.commit()
+        self.db_session.refresh(data)
         return data
 
     @override

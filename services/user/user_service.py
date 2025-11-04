@@ -1,13 +1,13 @@
 from datetime import datetime, timezone
-from typing import List, Any
+from typing import Any
 
 from flask import Response
 from flask_login import login_user, current_user
-from werkzeug.exceptions import BadRequest, NotFound, Unauthorized, Conflict, UnprocessableEntity
+from werkzeug.exceptions import BadRequest, NotFound, Unauthorized, Conflict
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
 
-from helpers.helpers import is_invalid_request
+from helpers.pagination import create_pagination_response
 from models.user import User
 from repositories.user_repository import UserRepository
 from resources.request.auth_request import LoginRequest
@@ -41,12 +41,6 @@ class UserService:
         return Response('Login successful.', status=200)
 
     def create_user(self, body: CreateUserRequest) -> dict[str, Any] | None:
-        if is_invalid_request(body):
-            raise BadRequest()
-
-        if self.get_user_by_email(body.email):
-            raise Conflict()
-
         user = self.repository.create(
             User(
                 email=body.email,
@@ -60,8 +54,15 @@ class UserService:
         )
         return UserResponse.model_validate(user).model_dump()
 
-    def get_users(self) -> List[dict[str, Any] | None]:
-        return [UserResponse.model_validate(user).model_dump() for user in self.repository.get_all()]
+    def get_users(self, page: int = 1, page_size: int = 10) -> dict[str, Any]:
+        users, total = self.repository.get_all(page=page, page_size=page_size)
+
+        return create_pagination_response(
+            items=[UserResponse.model_validate(user).model_dump() for user in users],
+            total=total,
+            page=page,
+            page_size=page_size
+        )
 
     def get_user(self, user_id: int) -> dict[str, Any] | None:
         user = self.get_user_by_id(user_id=user_id)
@@ -70,10 +71,7 @@ class UserService:
     def update_user(self, user_id: int, body: UpdateUserRequest) -> dict[str, Any] | None:
         user = self.get_user_by_id(user_id=user_id)
 
-        if is_invalid_request(body):
-            raise BadRequest()
-
-        user.update(body.__dict__)
+        user.update(body.model_dump(exclude_unset=True))
         user.updated_at = datetime.now(timezone.utc)
         user.updated_by = current_user.id
 
@@ -84,7 +82,7 @@ class UserService:
         user = self.get_user_by_id(user_id=user_id)
 
         if current_user.id == user.id:
-            raise UnprocessableEntity()
+            raise Conflict()
 
         self.repository.delete(user)
         return Response(f'User with id={user_id} deleted.', status=200)

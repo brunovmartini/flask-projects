@@ -164,13 +164,33 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="resources.routers.project_routes.get_projects">
 <span class="sig-prename descclassname"><span class="pre">resources.routers.project_routes.</span></span><span class="sig-name descname"><span class="pre">get_projects</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#resources.routers.project_routes.get_projects" title="Link to this definition">¶</a></dt>
-<dd><p>Retrieve all projects.</p>
+<dd><p>Retrieve a paginated list of projects.</p>
+<dl class="simple">
+<dt>Query parameters:</dt><dd><p>page (int, optional): Page number (default: 1). Must be greater than 0.
+page_size (int, optional): Number of items per page (default: 10). Must be between 1 and 100.</p>
+</dd>
+</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>List of projects in JSON format</p>
+<dd class="field-odd"><p>Paginated response containing projects and metadata</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>list[dict]</p>
+<dd class="field-even"><p>dict</p>
+</dd>
+<dt class="field-odd">Return items<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of project objects</p>
+</dd>
+<dt class="field-even">Return meta<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pagination metadata containing:
+- page (int): Current page number
+- page_size (int): Number of items per page
+- total (int): Total number of items
+- total_pages (int): Total number of pages
+- has_next (bool): Whether there is a next page
+- has_prev (bool): Whether there is a previous page</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>BadRequest</strong> – if pagination parameters are invalid</p>
 </dd>
 </dl>
 </dd></dl>
@@ -178,19 +198,39 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="resources.routers.project_routes.get_tasks_by_project">
 <span class="sig-prename descclassname"><span class="pre">resources.routers.project_routes.</span></span><span class="sig-name descname"><span class="pre">get_tasks_by_project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#resources.routers.project_routes.get_tasks_by_project" title="Link to this definition">¶</a></dt>
-<dd><p>Retrieve all tasks for a specific project.</p>
+<dd><p>Retrieve a paginated list of tasks for a specific project.</p>
+<dl class="simple">
+<dt>Query parameters:</dt><dd><p>page (int, optional): Page number (default: 1). Must be greater than 0.
+page_size (int, optional): Number of items per page (default: 10). Must be between 1 and 100.</p>
+</dd>
+</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>project_id</strong> (<em>int</em>) – ID of the project</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of tasks in JSON format</p>
+<dd class="field-even"><p>Paginated response containing tasks and metadata</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list[dict]</p>
+<dd class="field-odd"><p>dict</p>
+</dd>
+<dt class="field-even">Return items<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of task objects</p>
+</dd>
+<dt class="field-odd">Return meta<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Pagination metadata containing:
+- page (int): Current page number
+- page_size (int): Number of items per page
+- total (int): Total number of items
+- total_pages (int): Total number of pages
+- has_next (bool): Whether there is a next page
+- has_prev (bool): Whether there is a previous page</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>NotFound</strong> – if project with given ID does not exist</p>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>NotFound</strong> – if project with given ID does not exist</p></li>
+<li><p><strong>BadRequest</strong> – if pagination parameters are invalid</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -261,7 +301,7 @@
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
 <li><p><strong>NotFound</strong> – if user with given ID does not exist</p></li>
-<li><p><strong>UnprocessableEntity</strong> – if trying to delete the currently logged-in user</p></li>
+<li><p><strong>Conflict</strong> – if trying to delete the currently logged-in user</p></li>
 </ul>
 </dd>
 </dl>
@@ -290,13 +330,33 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="resources.routers.user_routes.get_users">
 <span class="sig-prename descclassname"><span class="pre">resources.routers.user_routes.</span></span><span class="sig-name descname"><span class="pre">get_users</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#resources.routers.user_routes.get_users" title="Link to this definition">¶</a></dt>
-<dd><p>Retrieve all users.</p>
+<dd><p>Retrieve a paginated list of users.</p>
+<dl class="simple">
+<dt>Query parameters:</dt><dd><p>page (int, optional): Page number (default: 1). Must be greater than 0.
+page_size (int, optional): Number of items per page (default: 10). Must be between 1 and 100.</p>
+</dd>
+</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>List of users in JSON format</p>
+<dd class="field-odd"><p>Paginated response containing users and metadata</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>list[dict]</p>
+<dd class="field-even"><p>dict</p>
+</dd>
+<dt class="field-odd">Return items<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of user objects</p>
+</dd>
+<dt class="field-even">Return meta<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pagination metadata containing:
+- page (int): Current page number
+- page_size (int): Number of items per page
+- total (int): Total number of items
+- total_pages (int): Total number of pages
+- has_next (bool): Whether there is a next page
+- has_prev (bool): Whether there is a previous page</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>BadRequest</strong> – if pagination parameters are invalid</p>
 </dd>
 </dl>
 </dd></dl>
@@ -322,6 +382,7 @@
 <dd class="field-even"><ul class="simple">
 <li><p><strong>BadRequest</strong> – if request body is invalid</p></li>
 <li><p><strong>NotFound</strong> – if user with given ID does not exist</p></li>
+<li><p><strong>Conflict</strong> – if user email already exists</p></li>
 </ul>
 </dd>
 </dl>

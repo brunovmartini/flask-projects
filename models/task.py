@@ -9,7 +9,7 @@ class Task(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(255), nullable=False)
-    description = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.String(255))
     start_date = db.Column(db.DateTime)
     due_date = db.Column(db.DateTime)
     project_id = db.Column(db.Integer, ForeignKey("project.id"))
@@ -19,5 +19,7 @@ class Task(db.Model):
     project = db.relationship("Project", backref="tasks", lazy="joined")
 
     def update(self, data: dict[str, str]):
+        allowed_fields = {'name', 'description', 'start_date', 'due_date'}
         for key, value in data.items():
-            setattr(self, key, value)
+            if key in allowed_fields:
+                setattr(self, key, value)

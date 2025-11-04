@@ -1,8 +1,10 @@
-from flask import Blueprint
+from flask import Blueprint, current_app, request
+from flask_login import login_required
 from flask_pydantic import validate
 from werkzeug.exceptions import NotFound
 
 from decorators.decorators import manager_required
+from helpers.pagination import validate_pagination
 from repositories.project_repository import ProjectRepository
 from repositories.task_repository import TaskRepository
 from resources.request.project_request import ProjectRequest
@@ -27,21 +29,39 @@ def create_project(body: ProjectRequest):
     :rtype: dict
     :raises BadRequest: if request body is invalid
     """
+    current_app.logger.info(f"Create project: name={body.name}")
     return ProjectService(repository=ProjectRepository(db_session=db.session)).create_project(body=body)
 
 
 @project_apis.route('/', methods=['GET'])
+@login_required
 def get_projects():
     """
-    Retrieve all projects.
+    Retrieve a paginated list of projects.
 
-    :return: List of projects in JSON format
-    :rtype: list[dict]
+    Query parameters:
+        page (int, optional): Page number (default: 1). Must be greater than 0.
+        page_size (int, optional): Number of items per page (default: 10). Must be between 1 and 100.
+
+    :return: Paginated response containing projects and metadata
+    :rtype: dict
+    :return items: List of project objects
+    :return meta: Pagination metadata containing:
+        - page (int): Current page number
+        - page_size (int): Number of items per page
+        - total (int): Total number of items
+        - total_pages (int): Total number of pages
+        - has_next (bool): Whether there is a next page
+        - has_prev (bool): Whether there is a previous page
+    :raises BadRequest: if pagination parameters are invalid
     """
-    return ProjectService(repository=ProjectRepository(db_session=db.session)).get_projects()
+    page, page_size = validate_pagination(request.args)
+    return ProjectService(repository=ProjectRepository(db_session=db.session)).get_projects(page=page,
+                                                                                            page_size=page_size)
 
 
 @project_apis.route('/<int:project_id>', methods=['GET'])
+@login_required
 def get_project(project_id: int):
     """
     Retrieve a single project by ID.
@@ -71,6 +91,7 @@ def update_project(project_id: int, body: ProjectRequest):
     :raises NotFound: if project with given ID does not exist
     :raises BadRequest: if request body is invalid
     """
+    current_app.logger.info(f"Update project: project_id={project_id}")
     return ProjectService(
         repository=ProjectRepository(db_session=db.session)
     ).update_project(project_id=project_id, body=body)
@@ -88,6 +109,7 @@ def delete_project(project_id: int):
     :rtype: flask.Response
     :raises NotFound: if project with given ID does not exist
     """
+    current_app.logger.info(f"Delete project: project_id={project_id}")
     return ProjectService(repository=ProjectRepository(db_session=db.session)).delete_project(project_id=project_id)
 
 
@@ -109,20 +131,39 @@ def create_task(project_id: int, body: TaskRequest):
     """
     if not ProjectService(repository=ProjectRepository(db_session=db.session)).get_project(project_id=project_id):
         raise NotFound(f'Not found project with id={project_id}.')
+    current_app.logger.info(f"Create task: name={body.name}, project_id={project_id}")
     return TaskService(repository=TaskRepository(db_session=db.session)).create_task(project_id=project_id, body=body)
 
 
 @project_apis.route('/<int:project_id>/tasks', methods=['GET'])
+@login_required
 def get_tasks_by_project(project_id: int):
     """
-    Retrieve all tasks for a specific project.
+    Retrieve a paginated list of tasks for a specific project.
+
+    Query parameters:
+        page (int, optional): Page number (default: 1). Must be greater than 0.
+        page_size (int, optional): Number of items per page (default: 10). Must be between 1 and 100.
 
     :param project_id: ID of the project
     :type project_id: int
-    :return: List of tasks in JSON format
-    :rtype: list[dict]
+    :return: Paginated response containing tasks and metadata
+    :rtype: dict
+    :return items: List of task objects
+    :return meta: Pagination metadata containing:
+        - page (int): Current page number
+        - page_size (int): Number of items per page
+        - total (int): Total number of items
+        - total_pages (int): Total number of pages
+        - has_next (bool): Whether there is a next page
+        - has_prev (bool): Whether there is a previous page
     :raises NotFound: if project with given ID does not exist
+    :raises BadRequest: if pagination parameters are invalid
     """
     if not ProjectService(repository=ProjectRepository(db_session=db.session)).get_project(project_id=project_id):
         raise NotFound(f'Not found project with id={project_id}.')
-    return TaskService(repository=TaskRepository(db_session=db.session)).get_tasks_by_project(project_id=project_id)
+
+    page, page_size = validate_pagination(request.args)
+    return TaskService(repository=TaskRepository(db_session=db.session)).get_tasks_by_project(
+        project_id=project_id, page=page, page_size=page_size
+    )

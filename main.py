@@ -1,3 +1,4 @@
+import logging
 import os
 
 from flask import Flask
@@ -19,6 +20,13 @@ from sqlalchemy_utils import database_exists, create_database
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "dev-secret-key")
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+app.logger.setLevel(logging.INFO)
 
 login_manager = LoginManager()
 login_manager.init_app(app)

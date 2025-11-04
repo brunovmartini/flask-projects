@@ -9,8 +9,12 @@ class TaskRepository(IRepository[Task, int]):
     def __init__(self, db_session: Session):
         self.db_session = db_session
 
-    def get_all_tasks_by_project(self, project_id: int) -> list[Task]:
-        return self.db_session.query(Task).filter(Task.project_id == project_id).all()
+    def get_all_tasks_by_project(self, project_id: int, page: int = 1, page_size: int = 10) -> tuple[list[Task], int]:
+        query = self.db_session.query(Task).filter(Task.project_id == project_id)
+        total = query.count()
+        offset = (page - 1) * page_size
+        tasks = query.offset(offset).limit(page_size).all()
+        return tasks, total
 
     @override
     def create(self, data: Task) -> Task:

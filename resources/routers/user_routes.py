@@ -1,7 +1,9 @@
-from flask import Blueprint
+from flask import Blueprint, current_app, request
+from flask_login import login_required
 from flask_pydantic import validate
 
 from decorators.decorators import manager_required
+from helpers.pagination import validate_pagination
 from repositories.user_repository import UserRepository
 from resources.request.user_request import CreateUserRequest, UpdateUserRequest
 from services.user.user_service import UserService
@@ -24,21 +26,38 @@ def create_user(body: CreateUserRequest):
     :raises BadRequest: if request body is invalid
     :raises Conflict: if user email already exists
     """
+    current_app.logger.info(f"Create user with email={body.email}")
     return UserService(repository=UserRepository(db_session=db.session)).create_user(body=body)
 
 
 @user_apis.route('/', methods=['GET'])
+@login_required
 def get_users():
     """
-    Retrieve all users.
+    Retrieve a paginated list of users.
 
-    :return: List of users in JSON format
-    :rtype: list[dict]
+    Query parameters:
+        page (int, optional): Page number (default: 1). Must be greater than 0.
+        page_size (int, optional): Number of items per page (default: 10). Must be between 1 and 100.
+
+    :return: Paginated response containing users and metadata
+    :rtype: dict
+    :return items: List of user objects
+    :return meta: Pagination metadata containing:
+        - page (int): Current page number
+        - page_size (int): Number of items per page
+        - total (int): Total number of items
+        - total_pages (int): Total number of pages
+        - has_next (bool): Whether there is a next page
+        - has_prev (bool): Whether there is a previous page
+    :raises BadRequest: if pagination parameters are invalid
     """
-    return UserService(repository=UserRepository(db_session=db.session)).get_users()
+    page, page_size = validate_pagination(request.args)
+    return UserService(repository=UserRepository(db_session=db.session)).get_users(page=page, page_size=page_size)
 
 
 @user_apis.route('/<int:user_id>', methods=['GET'])
+@login_required
 def get_user(user_id: int):
     """
     Retrieve a single user by ID.
@@ -67,7 +86,9 @@ def update_user(user_id: int, body: UpdateUserRequest):
     :rtype: dict
     :raises BadRequest: if request body is invalid
     :raises NotFound: if user with given ID does not exist
+    :raises Conflict: if user email already exists
     """
+    current_app.logger.info(f"Update user: user_id={user_id}")
     return UserService(repository=UserRepository(db_session=db.session)).update_user(user_id=user_id, body=body)
 
 
@@ -82,6 +103,7 @@ def delete_user(user_id: int):
     :return: Response with deletion confirmation
     :rtype: flask.Response
     :raises NotFound: if user with given ID does not exist
-    :raises UnprocessableEntity: if trying to delete the currently logged-in user
+    :raises Conflict: if trying to delete the currently logged-in user
     """
+    current_app.logger.info(f"Delete user: user_id={user_id}")
     return UserService(repository=UserRepository(db_session=db.session)).delete_user(user_id=user_id)

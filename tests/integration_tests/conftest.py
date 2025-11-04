@@ -32,7 +32,8 @@ def client():
 
 @pytest.fixture
 def user():
-    user = User(
+    return User(
+        id = 1,
         name="Auth Test User",
         username="authtest",
         email="authtest@example.com",
@@ -40,13 +41,12 @@ def user():
         user_type=1,
         created_by=1
     )
-    user.get_id = lambda self=user: str(1)
-    return user
 
 
 @pytest.fixture
 def user_employee():
-    user = User(
+    return User(
+        id=2,
         name="Employee Test User",
         username="employee",
         email="employee@example.com",
@@ -54,8 +54,6 @@ def user_employee():
         user_type=2,
         created_by=1
     )
-    user.get_id = lambda self=user: str(1)
-    return user
 
 
 def login_as(client, user):
