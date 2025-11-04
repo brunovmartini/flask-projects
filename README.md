@@ -158,3 +158,5 @@ The `task` table was created to store information about the tasks including name
 
 - User authentication, including login and logout endpoints, have been added due to the relation between the type of the user and the permissions of several endpoints.
 - Password encryption has been added for extra security when creating a user.
+- Logging has been added for `POST`, `PUT` and `DELETE` endpoints.
+- Pagination has been added for `GET` endpoints.
