@@ -13,7 +13,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(255), index=True, nullable=False, unique=True)
     password = db.Column(db.String(255), nullable=False)
     username = db.Column(db.String(255), nullable=False)
-    name = db.Column(db.String(255), nullable=True)
+    name = db.Column(db.String(255), nullable=False)
     user_type = db.Column(db.Integer, ForeignKey("user_type.id"))
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = db.Column(db.DateTime)

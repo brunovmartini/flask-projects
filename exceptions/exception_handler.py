@@ -1,5 +1,6 @@
 from flask import Flask, Response
-from werkzeug.exceptions import BadRequest, Conflict, NotFound, InternalServerError, Unauthorized, Forbidden, UnprocessableEntity
+from werkzeug.exceptions import BadRequest, NotFound, InternalServerError, Unauthorized, Forbidden, UnprocessableEntity
+from sqlalchemy.exc import IntegrityError
 
 
 def add_exception_handler(app: Flask):
@@ -31,7 +32,7 @@ def add_exception_handler(app: Flask):
             status=404
         )
 
-    @app.errorhandler(Conflict)
+    @app.errorhandler(IntegrityError)
     def handle_conflict_error(e):
         return Response(
             response='Email already in use.',

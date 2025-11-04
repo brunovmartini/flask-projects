@@ -70,6 +70,7 @@ def update_user(user_id: int, body: UpdateUserRequest):
     :rtype: dict
     :raises BadRequest: if request body is invalid
     :raises NotFound: if user with given ID does not exist
+    :raises Conflict: if user email already exists
     """
     return UserService(repository=UserRepository(db_session=db.session)).update_user(user_id=user_id, body=body)
 

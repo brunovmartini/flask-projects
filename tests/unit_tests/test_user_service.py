@@ -10,7 +10,6 @@ from resources.response.user_type_response import UserTypeResponse
 from services.user.user_service import UserService
 from werkzeug.exceptions import (
     BadRequest,
-    Conflict,
     NotFound,
     Unauthorized,
     UnprocessableEntity,
@@ -134,12 +133,6 @@ def test_create_user_success(
             mock_repository.create.assert_called_once()
             mock_hash.assert_called_once_with(fake_request.password)
             mock_response.assert_called_once()
-
-
-def test_create_user_conflict(service, fake_user, fake_request):
-    with patch.object(service, "get_user_by_email", return_value=fake_user):
-        with pytest.raises(Conflict):
-            service.create_user(fake_request)
 
 
 def test_get_users_success(service, mock_repository, fake_user):

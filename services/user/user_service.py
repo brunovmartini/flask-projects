@@ -3,7 +3,7 @@ from typing import List, Any
 
 from flask import Response
 from flask_login import login_user, current_user
-from werkzeug.exceptions import BadRequest, NotFound, Unauthorized, Conflict, UnprocessableEntity
+from werkzeug.exceptions import BadRequest, NotFound, Unauthorized, UnprocessableEntity
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
 
@@ -40,9 +40,6 @@ class UserService:
         return Response('Login successful.', status=200)
 
     def create_user(self, body: CreateUserRequest) -> dict[str, Any] | None:
-        if self.get_user_by_email(body.email):
-            raise Conflict()
-
         user = self.repository.create(
             User(
                 email=body.email,
