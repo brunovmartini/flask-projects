@@ -1,4 +1,4 @@
-from flask import Blueprint, request, Response
+from flask import Blueprint, request, Response, current_app
 from flask_login import logout_user, login_required
 
 from repositories.user_repository import UserRepository
@@ -22,6 +22,7 @@ def login():
     :raises BadRequest: if request body is invalid
     :raises Unauthorized: if email or password is incorrect
     """
+    current_app.logger.info(f"User login with email: {request.get_json().get('email')}")
     return UserService(repository=UserRepository(db_session=db.session)).login(data=request.get_json())
 
 

@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, current_app
 from flask_pydantic import validate
 from flask_login import login_required
 
@@ -25,6 +25,7 @@ def create_user(body: CreateUserRequest):
     :raises BadRequest: if request body is invalid
     :raises Conflict: if user email already exists
     """
+    current_app.logger.info(f"Create user with email={body.email}")
     return UserService(repository=UserRepository(db_session=db.session)).create_user(body=body)
 
 
@@ -72,6 +73,7 @@ def update_user(user_id: int, body: UpdateUserRequest):
     :raises NotFound: if user with given ID does not exist
     :raises Conflict: if user email already exists
     """
+    current_app.logger.info(f"Update user: user_id={user_id}")
     return UserService(repository=UserRepository(db_session=db.session)).update_user(user_id=user_id, body=body)
 
 
@@ -88,4 +90,5 @@ def delete_user(user_id: int):
     :raises NotFound: if user with given ID does not exist
     :raises Conflict: if trying to delete the currently logged-in user
     """
+    current_app.logger.info(f"Delete user: user_id={user_id}")
     return UserService(repository=UserRepository(db_session=db.session)).delete_user(user_id=user_id)

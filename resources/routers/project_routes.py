@@ -1,5 +1,5 @@
-from flask import Blueprint
-from flask_login import login_required
+from flask import Blueprint, current_app
+from flask_login import login_required, current_user
 from flask_pydantic import validate
 from werkzeug.exceptions import NotFound
 
@@ -28,6 +28,7 @@ def create_project(body: ProjectRequest):
     :rtype: dict
     :raises BadRequest: if request body is invalid
     """
+    current_app.logger.info(f"Create project: name={body.name}")
     return ProjectService(repository=ProjectRepository(db_session=db.session)).create_project(body=body)
 
 
@@ -74,6 +75,7 @@ def update_project(project_id: int, body: ProjectRequest):
     :raises NotFound: if project with given ID does not exist
     :raises BadRequest: if request body is invalid
     """
+    current_app.logger.info(f"Update project: project_id={project_id}")
     return ProjectService(
         repository=ProjectRepository(db_session=db.session)
     ).update_project(project_id=project_id, body=body)
@@ -91,6 +93,7 @@ def delete_project(project_id: int):
     :rtype: flask.Response
     :raises NotFound: if project with given ID does not exist
     """
+    current_app.logger.info(f"Delete project: project_id={project_id}")
     return ProjectService(repository=ProjectRepository(db_session=db.session)).delete_project(project_id=project_id)
 
 
@@ -112,6 +115,7 @@ def create_task(project_id: int, body: TaskRequest):
     """
     if not ProjectService(repository=ProjectRepository(db_session=db.session)).get_project(project_id=project_id):
         raise NotFound(f'Not found project with id={project_id}.')
+    current_app.logger.info(f"Create task: name={body.name}, project_id={project_id}")
     return TaskService(repository=TaskRepository(db_session=db.session)).create_task(project_id=project_id, body=body)
 
 
