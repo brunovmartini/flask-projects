@@ -44,7 +44,7 @@ class ProjectService:
     def update_project(self, project_id: int, body: ProjectRequest) -> dict[str, Any] | None:
         project = self.get_project_by_id(project_id=project_id)
 
-        project.update(body.__dict__)
+        project.update(body.model_dump(exclude_unset=True))
         project.updated_at = datetime.now(timezone.utc)
         project.updated_by = current_user.id
 

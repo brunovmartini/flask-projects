@@ -1,5 +1,5 @@
 from flask import Flask, Response
-from werkzeug.exceptions import BadRequest, NotFound, InternalServerError, Unauthorized, Forbidden, UnprocessableEntity
+from werkzeug.exceptions import BadRequest, NotFound, InternalServerError, Unauthorized, Forbidden, Conflict
 from sqlalchemy.exc import IntegrityError
 
 
@@ -33,17 +33,17 @@ def add_exception_handler(app: Flask):
         )
 
     @app.errorhandler(IntegrityError)
-    def handle_conflict_error(e):
+    def handle_integrity_error(e):
         return Response(
             response='Email already in use.',
             status=409
         )
 
-    @app.errorhandler(UnprocessableEntity)
-    def handle_unprocessable_entity_error(e):
+    @app.errorhandler(Conflict)
+    def handle_conflict_error(e):
         return Response(
             response='Current user can not be deleted.',
-            status=422
+            status=409
         )
 
     @app.errorhandler(InternalServerError)

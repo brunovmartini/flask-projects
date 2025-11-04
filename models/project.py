@@ -18,5 +18,7 @@ class Project(db.Model):
     updated_by = db.Column(db.Integer, ForeignKey("user.id"))
 
     def update(self, data: dict[str, str]):
+        allowed_fields = {'name', 'subject', 'start_date', 'due_date'}
         for key, value in data.items():
-            setattr(self, key, value)
+            if key in allowed_fields:
+                setattr(self, key, value)

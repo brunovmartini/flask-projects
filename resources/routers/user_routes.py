@@ -86,6 +86,6 @@ def delete_user(user_id: int):
     :return: Response with deletion confirmation
     :rtype: flask.Response
     :raises NotFound: if user with given ID does not exist
-    :raises UnprocessableEntity: if trying to delete the currently logged-in user
+    :raises Conflict: if trying to delete the currently logged-in user
     """
     return UserService(repository=UserRepository(db_session=db.session)).delete_user(user_id=user_id)

@@ -19,5 +19,7 @@ class Task(db.Model):
     project = db.relationship("Project", backref="tasks", lazy="joined")
 
     def update(self, data: dict[str, str]):
+        allowed_fields = {'name', 'description', 'start_date', 'due_date'}
         for key, value in data.items():
-            setattr(self, key, value)
+            if key in allowed_fields:
+                setattr(self, key, value)

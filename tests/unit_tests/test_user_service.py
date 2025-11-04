@@ -12,7 +12,7 @@ from werkzeug.exceptions import (
     BadRequest,
     NotFound,
     Unauthorized,
-    UnprocessableEntity,
+    Conflict,
 )
 
 
@@ -205,7 +205,7 @@ def test_update_user_success(
             result = service.update_user(1, fake_request)
             assert result["id"] == 1
             assert result["updated_by"] == 2
-            fake_user.update.assert_called_once_with(fake_request.__dict__)
+            fake_user.update.assert_called_once_with(fake_request.model_dump(exclude_unset=True))
             mock_repository.update.assert_called_once_with(fake_user)
             mock_response.assert_called_once()
 
@@ -226,5 +226,5 @@ def test_delete_user_self_delete(service, fake_user):
     with patch("services.user.user_service.current_user", current_user), patch.object(
         service, "get_user_by_id", return_value=fake_user
     ):
-        with pytest.raises(UnprocessableEntity):
+        with pytest.raises(Conflict):
             service.delete_user(1)

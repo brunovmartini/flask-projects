@@ -126,7 +126,7 @@ def test_update_project_success(
             "created_by": 1,
             "updated_by": 2,
         }
-        fake_project.update.assert_called_once_with(fake_request.__dict__)
+        fake_project.update.assert_called_once_with(fake_request.model_dump(exclude_unset=True))
         mock_repository.update.assert_called_once_with(fake_project)
 
 

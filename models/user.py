@@ -23,8 +23,7 @@ class User(UserMixin, db.Model):
     type = db.relationship("UserType", backref="users", lazy="joined")
 
     def update(self, data: dict[str, str]):
+        allowed_fields = {'email', 'username', 'name', 'user_type'}
         for key, value in data.items():
-            setattr(self, key, value)
-
-    def get_id(self):
-        return str(self.id)
+            if key in allowed_fields:
+                setattr(self, key, value)

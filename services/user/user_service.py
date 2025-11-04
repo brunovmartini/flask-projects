@@ -3,7 +3,7 @@ from typing import List, Any
 
 from flask import Response
 from flask_login import login_user, current_user
-from werkzeug.exceptions import BadRequest, NotFound, Unauthorized, UnprocessableEntity
+from werkzeug.exceptions import BadRequest, NotFound, Unauthorized, Conflict
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
 
@@ -63,7 +63,7 @@ class UserService:
     def update_user(self, user_id: int, body: UpdateUserRequest) -> dict[str, Any] | None:
         user = self.get_user_by_id(user_id=user_id)
 
-        user.update(body.__dict__)
+        user.update(body.model_dump(exclude_unset=True))
         user.updated_at = datetime.now(timezone.utc)
         user.updated_by = current_user.id
 
@@ -74,7 +74,7 @@ class UserService:
         user = self.get_user_by_id(user_id=user_id)
 
         if current_user.id == user.id:
-            raise UnprocessableEntity()
+            raise Conflict()
 
         self.repository.delete(user)
         return Response(f'User with id={user_id} deleted.', status=200)
