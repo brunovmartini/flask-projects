@@ -26,7 +26,10 @@ def invalid_request():
 
 
 @patch("services.user.user_service.UserService.get_users")
-def test_get_users(mock_get_users, client):
+@patch("flask_login.utils._get_user")
+def test_get_users(mock__get_user, mock_get_users, client, user):
+    login_as(client, user)
+    mock__get_user.return_value = user
     mock_get_users.return_value = [
         {"id": 1, "username": "test1"},
         {"id": 2, "username": "test2"},
@@ -37,16 +40,32 @@ def test_get_users(mock_get_users, client):
     assert response.json[0]["username"] == "test1"
 
 
+def test_get_users_unauthorized(client, user):
+    response = client.get("/users/")
+    assert response.status_code == 401
+
+
 @patch("services.user.user_service.UserService.get_user")
-def test_get_user_by_id(mock_get_user, client):
+@patch("flask_login.utils._get_user")
+def test_get_user_by_id(mock__get_user, mock_get_user, client, user):
+    login_as(client, user)
+    mock__get_user.return_value = user
     mock_get_user.return_value = {"id": 123, "username": "testuser"}
     response = client.get("/users/123")
     assert response.status_code == 200
     assert response.json["id"] == 123
 
 
+def test_get_user_by_id_unauthorized(client, user):
+    response = client.get("/users/1")
+    assert response.status_code == 401
+
+
 @patch("repositories.user_repository.UserRepository.get_by_id")
-def test_get_user_by_id_not_found(mock_get_user, client):
+@patch("flask_login.utils._get_user")
+def test_get_user_by_id_not_found(mock__get_user, mock_get_user, client, user):
+    login_as(client, user)
+    mock__get_user.return_value = user
     mock_get_user.return_value = None
     response = client.get("/users/9999")
     assert response.status_code == 404

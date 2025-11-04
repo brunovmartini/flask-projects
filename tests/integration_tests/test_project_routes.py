@@ -100,7 +100,11 @@ def test_create_project_as_employee_forbidden(
 
 
 @patch("services.project.project_service.ProjectService.get_projects")
-def test_get_projects(mock_get_all_projects, client):
+@patch("flask_login.utils._get_user")
+def test_get_projects(mock__get_user, mock_get_all_projects, client, user_employee):
+    login_as(client, user_employee)
+    mock__get_user.return_value = user_employee
+
     mock_get_all_projects.return_value = [
         {"id": 1, "name": "Test Project", "subject": "X"}
     ]
@@ -110,8 +114,17 @@ def test_get_projects(mock_get_all_projects, client):
     assert len(response.json) > 0
 
 
+def test_get_projects_unauthorized(client):
+    response = client.get("/projects/")
+    assert response.status_code == 401
+
+
 @patch("services.project.project_service.ProjectService.get_project")
-def test_get_project_by_id(mock_get_project_by_id, client):
+@patch("flask_login.utils._get_user")
+def test_get_project_by_id(mock__get_user, mock_get_project_by_id, client, user_employee):
+    login_as(client, user_employee)
+    mock__get_user.return_value = user_employee
+
     mock_get_project_by_id.return_value = {
         "id": 123,
         "name": "Project X",
@@ -122,8 +135,17 @@ def test_get_project_by_id(mock_get_project_by_id, client):
     assert response.json["id"] == 123
 
 
+def test_get_project_by_id_unauthorized(client):
+    response = client.get("/projects/1")
+    assert response.status_code == 401
+
+
 @patch("repositories.project_repository.ProjectRepository.get_by_id")
-def test_get_project_not_found(mock_get_project_by_id_repo, client):
+@patch("flask_login.utils._get_user")
+def test_get_project_not_found(mock__get_user, mock_get_project_by_id_repo, client, user_employee):
+    login_as(client, user_employee)
+    mock__get_user.return_value = user_employee
+
     mock_get_project_by_id_repo.return_value = None
     response = client.get("/projects/9999")
     assert response.status_code == 404
@@ -219,9 +241,13 @@ def test_create_task_for_nonexistent_project(
 
 @patch("services.project.project_service.ProjectService.get_project_by_id")
 @patch("services.task.task_service.TaskService.get_tasks_by_project")
+@patch("flask_login.utils._get_user")
 def test_get_tasks_by_project(
-    mock_get_tasks_by_project_id, mock_get_project_by_id, client, project
+    mock__get_user, mock_get_tasks_by_project_id, mock_get_project_by_id, client, project, user_employee
 ):
+    login_as(client, user_employee)
+    mock__get_user.return_value = user_employee
+
     mock_get_project_by_id.return_value = project
     mock_get_tasks_by_project_id.return_value = [{"id": 1, "name": "Task 1"}]
     response = client.get("/projects/1/tasks")
@@ -230,11 +256,20 @@ def test_get_tasks_by_project(
     assert len(response.json) > 0
 
 
+def test_get_tasks_unauthorized(client):
+    response = client.get("/projects/1/tasks")
+    assert response.status_code == 401
+
+
 @patch("services.project.project_service.ProjectService.get_project")
 @patch("services.task.task_service.TaskService.get_tasks_by_project")
+@patch("flask_login.utils._get_user")
 def test_get_tasks_for_nonexistent_project(
-    mock_get_tasks_by_project_id, mock_get_project_by_id, client
+    mock__get_user, mock_get_tasks_by_project_id, mock_get_project_by_id, client, user_employee
 ):
+    login_as(client, user_employee)
+    mock__get_user.return_value = user_employee
+
     mock_get_project_by_id.return_value = None
     mock_get_tasks_by_project_id.return_value = []
     response = client.get("/projects/9999/tasks")

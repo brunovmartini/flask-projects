@@ -1,4 +1,5 @@
 from flask import Blueprint
+from flask_login import login_required
 from flask_pydantic import validate
 from werkzeug.exceptions import NotFound
 
@@ -31,6 +32,7 @@ def create_project(body: ProjectRequest):
 
 
 @project_apis.route('/', methods=['GET'])
+@login_required
 def get_projects():
     """
     Retrieve all projects.
@@ -42,6 +44,7 @@ def get_projects():
 
 
 @project_apis.route('/<int:project_id>', methods=['GET'])
+@login_required
 def get_project(project_id: int):
     """
     Retrieve a single project by ID.
@@ -113,6 +116,7 @@ def create_task(project_id: int, body: TaskRequest):
 
 
 @project_apis.route('/<int:project_id>/tasks', methods=['GET'])
+@login_required
 def get_tasks_by_project(project_id: int):
     """
     Retrieve all tasks for a specific project.

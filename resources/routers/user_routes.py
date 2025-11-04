@@ -1,5 +1,6 @@
 from flask import Blueprint
 from flask_pydantic import validate
+from flask_login import login_required
 
 from decorators.decorators import manager_required
 from repositories.user_repository import UserRepository
@@ -28,6 +29,7 @@ def create_user(body: CreateUserRequest):
 
 
 @user_apis.route('/', methods=['GET'])
+@login_required
 def get_users():
     """
     Retrieve all users.
@@ -39,6 +41,7 @@ def get_users():
 
 
 @user_apis.route('/<int:user_id>', methods=['GET'])
+@login_required
 def get_user(user_id: int):
     """
     Retrieve a single user by ID.
