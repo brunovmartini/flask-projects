@@ -1,8 +1,9 @@
-from flask import Blueprint, current_app
-from flask_pydantic import validate
+from flask import Blueprint, current_app, request
 from flask_login import login_required
+from flask_pydantic import validate
 
 from decorators.decorators import manager_required
+from helpers.pagination import validate_pagination
 from repositories.user_repository import UserRepository
 from resources.request.user_request import CreateUserRequest, UpdateUserRequest
 from services.user.user_service import UserService
@@ -32,13 +33,8 @@ def create_user(body: CreateUserRequest):
 @user_apis.route('/', methods=['GET'])
 @login_required
 def get_users():
-    """
-    Retrieve all users.
-
-    :return: List of users in JSON format
-    :rtype: list[dict]
-    """
-    return UserService(repository=UserRepository(db_session=db.session)).get_users()
+    page, page_size = validate_pagination(request.args)
+    return UserService(repository=UserRepository(db_session=db.session)).get_users(page=page, page_size=page_size)
 
 
 @user_apis.route('/<int:user_id>', methods=['GET'])

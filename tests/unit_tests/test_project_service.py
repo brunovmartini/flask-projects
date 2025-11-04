@@ -74,10 +74,12 @@ def test_create_project_success(
 
 
 def test_get_projects_success(service, mock_repository, fake_project):
-    mock_repository.get_all.return_value = [fake_project]
+    mock_repository.get_all.return_value = ([fake_project], 1)
     result = service.get_projects()
 
-    assert result == [
+    assert "items" in result
+    assert "meta" in result
+    assert result["items"] == [
         {
             "id": 1,
             "name": fake_project.name,
@@ -88,7 +90,10 @@ def test_get_projects_success(service, mock_repository, fake_project):
             "updated_by": None,
         }
     ]
-    mock_repository.get_all.assert_called_once()
+    assert result["meta"]["total"] == 1
+    assert result["meta"]["page"] == 1
+    assert result["meta"]["page_size"] == 10
+    mock_repository.get_all.assert_called_once_with(page=1, page_size=10)
 
 
 def test_get_project_success(service, fake_project):

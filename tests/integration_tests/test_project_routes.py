@@ -105,13 +105,25 @@ def test_get_projects(mock__get_user, mock_get_all_projects, client, user_employ
     login_as(client, user_employee)
     mock__get_user.return_value = user_employee
 
-    mock_get_all_projects.return_value = [
-        {"id": 1, "name": "Test Project", "subject": "X"}
-    ]
+    mock_get_all_projects.return_value = {
+        "items": [
+            {"id": 1, "name": "Test Project", "subject": "X"}
+        ],
+        "meta": {
+            "page": 1,
+            "page_size": 10,
+            "total": 1,
+            "total_pages": 1,
+            "has_next": False,
+            "has_prev": False,
+        }
+    }
     response = client.get("/projects/")
     assert response.status_code == 200
-    assert isinstance(response.json, list)
-    assert len(response.json) > 0
+    assert "items" in response.json
+    assert "meta" in response.json
+    assert isinstance(response.json["items"], list)
+    assert len(response.json["items"]) > 0
 
 
 def test_get_projects_unauthorized(client):
@@ -249,11 +261,23 @@ def test_get_tasks_by_project(
     mock__get_user.return_value = user_employee
 
     mock_get_project_by_id.return_value = project
-    mock_get_tasks_by_project_id.return_value = [{"id": 1, "name": "Task 1"}]
+    mock_get_tasks_by_project_id.return_value = {
+        "items": [{"id": 1, "name": "Task 1"}],
+        "meta": {
+            "page": 1,
+            "page_size": 10,
+            "total": 1,
+            "total_pages": 1,
+            "has_next": False,
+            "has_prev": False,
+        }
+    }
     response = client.get("/projects/1/tasks")
     assert response.status_code == 200
-    assert isinstance(response.json, list)
-    assert len(response.json) > 0
+    assert "items" in response.json
+    assert "meta" in response.json
+    assert isinstance(response.json["items"], list)
+    assert len(response.json["items"]) > 0
 
 
 def test_get_tasks_unauthorized(client):

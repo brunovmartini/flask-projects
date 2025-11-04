@@ -136,7 +136,7 @@ def test_create_user_success(
 
 
 def test_get_users_success(service, mock_repository, fake_user):
-    mock_repository.get_all.return_value = [fake_user]
+    mock_repository.get_all.return_value = ([fake_user], 1)
     with patch("services.user.user_service.current_user") as mock_current_user:
         mock_current_user.id = 2
         with patch(
@@ -155,10 +155,15 @@ def test_get_users_success(service, mock_repository, fake_user):
         ) as mock_response:
             result = service.get_users()
 
-            assert len(result) == 1
-            assert result[0]["id"] == 1
+            assert "items" in result
+            assert "meta" in result
+            assert len(result["items"]) == 1
+            assert result["items"][0]["id"] == 1
+            assert result["meta"]["total"] == 1
+            assert result["meta"]["page"] == 1
+            assert result["meta"]["page_size"] == 10
             mock_response.assert_called_once()
-            mock_repository.get_all.assert_called_once()
+            mock_repository.get_all.assert_called_once_with(page=1, page_size=10)
 
 
 def test_get_user_success(service, fake_user):

@@ -19,9 +19,12 @@ class UserRepository(IRepository[User, int]):
         self.db_session.refresh(data)
         return data
 
-    @override
-    def get_all(self) -> list[User]:
-        return self.db_session.query(User).all()
+    def get_all(self, page: int = 1, page_size: int = 10) -> tuple[list[User], int]:
+        query = self.db_session.query(User)
+        total = query.count()
+        offset = (page - 1) * page_size
+        users = query.offset(offset).limit(page_size).all()
+        return users, total
 
     @override
     def get_by_id(self, id: int) -> User | None:

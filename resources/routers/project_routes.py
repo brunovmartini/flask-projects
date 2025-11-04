@@ -1,9 +1,10 @@
-from flask import Blueprint, current_app
-from flask_login import login_required, current_user
+from flask import Blueprint, current_app, request
+from flask_login import login_required
 from flask_pydantic import validate
 from werkzeug.exceptions import NotFound
 
 from decorators.decorators import manager_required
+from helpers.pagination import validate_pagination
 from repositories.project_repository import ProjectRepository
 from repositories.task_repository import TaskRepository
 from resources.request.project_request import ProjectRequest
@@ -35,13 +36,9 @@ def create_project(body: ProjectRequest):
 @project_apis.route('/', methods=['GET'])
 @login_required
 def get_projects():
-    """
-    Retrieve all projects.
-
-    :return: List of projects in JSON format
-    :rtype: list[dict]
-    """
-    return ProjectService(repository=ProjectRepository(db_session=db.session)).get_projects()
+    page, page_size = validate_pagination(request.args)
+    return ProjectService(repository=ProjectRepository(db_session=db.session)).get_projects(page=page,
+                                                                                            page_size=page_size)
 
 
 @project_apis.route('/<int:project_id>', methods=['GET'])
@@ -122,15 +119,10 @@ def create_task(project_id: int, body: TaskRequest):
 @project_apis.route('/<int:project_id>/tasks', methods=['GET'])
 @login_required
 def get_tasks_by_project(project_id: int):
-    """
-    Retrieve all tasks for a specific project.
-
-    :param project_id: ID of the project
-    :type project_id: int
-    :return: List of tasks in JSON format
-    :rtype: list[dict]
-    :raises NotFound: if project with given ID does not exist
-    """
     if not ProjectService(repository=ProjectRepository(db_session=db.session)).get_project(project_id=project_id):
         raise NotFound(f'Not found project with id={project_id}.')
-    return TaskService(repository=TaskRepository(db_session=db.session)).get_tasks_by_project(project_id=project_id)
+
+    page, page_size = validate_pagination(request.args)
+    return TaskService(repository=TaskRepository(db_session=db.session)).get_tasks_by_project(
+        project_id=project_id, page=page, page_size=page_size
+    )

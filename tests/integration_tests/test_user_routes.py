@@ -30,14 +30,26 @@ def invalid_request():
 def test_get_users(mock__get_user, mock_get_users, client, user):
     login_as(client, user)
     mock__get_user.return_value = user
-    mock_get_users.return_value = [
-        {"id": 1, "username": "test1"},
-        {"id": 2, "username": "test2"},
-    ]
+    mock_get_users.return_value = {
+        "items": [
+            {"id": 1, "username": "test1"},
+            {"id": 2, "username": "test2"},
+        ],
+        "meta": {
+            "page": 1,
+            "page_size": 10,
+            "total": 2,
+            "total_pages": 1,
+            "has_next": False,
+            "has_prev": False,
+        }
+    }
     response = client.get("/users/")
     assert response.status_code == 200
-    assert isinstance(response.json, list)
-    assert response.json[0]["username"] == "test1"
+    assert "items" in response.json
+    assert "meta" in response.json
+    assert isinstance(response.json["items"], list)
+    assert response.json["items"][0]["username"] == "test1"
 
 
 def test_get_users_unauthorized(client, user):
