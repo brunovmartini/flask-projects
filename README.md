@@ -1,6 +1,6 @@
-# Projects-Core-Service
+# Flask-Projects
 
-**Projects-Core-Service** is a web application created with Flask for managing users, projects and tasks.
+**Flask-Projects** is a web application created with Flask for managing users, projects and tasks.
 
 ### Requirements 📋
 
